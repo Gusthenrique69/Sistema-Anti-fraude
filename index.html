@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GH Bank - Sistema Antifraude</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Encontre a div antiga de login e substitua por esta estrutura dupla -->
+<div id="painel-autenticacao" class="container-login">
+    
+    <!-- CARD DE LOGIN -->
+    <div id="card-login" class="card-login">
+        <h2>GH BANK 🛡️</h2>
+        <p class="subtitulo">Acesse o portal de segurança</p>
+        
+        <form id="form-login" onsubmit="event.preventDefault(); realizarLogin(document.getElementById('email-login').value, document.getElementById('senha-login').value);">
+            <div class="campo-grupo">
+                <label for="email-login">E-mail Corporativo</label>
+                <input type="email" id="email-login" required placeholder="operador@ghbank.com.br">
+            </div>
+            <div class="campo-grupo">
+                <label for="senha-login">Senha de Acesso</label>
+                <input type="password" id="senha-login" required placeholder="••••••••">
+            </div>
+            <button type="submit" class="btn-principal">Entrar no Sistema</button>
+        </form>
+        <p class="texto-alternar" style="margin-top:15px; font-size:0.9rem;">Não tem conta? <a href="#" onclick="alternarTelasAuth(true)">Crie uma aqui</a></p>
+        <div id="mensagem-login-erro" class="msg-erro"></div>
+    </div>
+
+    <!-- CARD DE CADASTRO -->
+    <div id="card-cadastro" class="card-login" style="display: none;">
+        <h2>GH BANK 🛡️</h2>
+        <p class="subtitulo">Crie sua nova conta de operador</p>
+        
+        <form id="form-cadastro">
+            <div class="campo-grupo">
+                <label for="nome-cadastro">Nome Completo</label>
+                <input type="text" id="nome-cadastro" required placeholder="Ex: João Silva">
+            </div>
+            <div class="campo-grupo">
+                <label for="email-cadastro">E-mail Corporativo</label>
+                <input type="email" id="email-cadastro" required placeholder="nome@ghbank.com.br">
+            </div>
+            <div class="campo-grupo">
+                <label for="cidade-cadastro">Cidade Base</label>
+                <input type="text" id="cidade-cadastro" required placeholder="Ex: São Paulo">
+            </div>
+            <div class="campo-grupo">
+                <label for="senha-cadastro">Senha de Acesso</label>
+                <input type="password" id="senha-cadastro" required placeholder="Mínimo 6 caracteres">
+            </div>
+            <button type="submit" class="btn-principal">Concluir Cadastro</button>
+        </form>
+        <p class="texto-alternar" style="margin-top:15px; font-size:0.9rem;">Já possui cadastro? <a href="#" onclick="alternarTelasAuth(false)">Fazer Login</a></p>
+        <div id="mensagem-cadastro-erro" class="msg-erro"></div>
+    </div>
+
+</div>
+
+
+    <!-- 2. PAINEL PRINCIPAL DO MONITOR DE FRAUDES (SÓ EXIBIDO APÓS LOGIN) -->
+    <div id="painel-principal" class="container-dashboard" style="display: none;">
+        <header class="barra-topo">
+            <h1>GH BANK 🛡️</h1>
+            <span class="tag-subtitulo">Monitor de Fraudes & Motor de Análise em Tempo Real</span>
+            <span id="operador-nome" class="operador-status">Operador Conectado</span>
+        </header>
+
+        <div class="grade-dashboard">
+            
+            <!-- Formulário de Nova Transferência -->
+            <section class="card-painel">
+                <h3>⚡ Solicitar Transferência</h3>
+                <form id="form-solicitar-transferencia">
+                    <div class="campo-grupo">
+                        <label for="cliente_id">Conta de Origem (ID Cliente)</label>
+                        <input type="number" id="cliente_id" required placeholder="Ex: 1">
+                    </div>
+                    <div class="campo-grupo">
+                        <label for="valor_reais">Montante (R$)</label>
+                        <input type="number" step="0.01" id="valor_reais" required placeholder="0,00">
+                    </div>
+                    <div class="campo-grupo">
+                        <label for="cidade">Cidade do Evento</label>
+                        <input type="text" id="cidade" required placeholder="Ex: São Paulo">
+                    </div>
+                    <div class="campo-grupo">
+                        <label for="dispositivo_id">Código do Dispositivo</label>
+                        <input type="text" id="dispositivo_id" required placeholder="Ex: celular-rodrigo">
+                    </div>
+                    <div class="campo-grupo">
+                        <label for="conta_destino">Endereço de Destino (Conta)</label>
+                        <input type="text" id="conta_destino" required placeholder="Ex: mercearia-esquina">
+                    </div>
+                    <button type="submit" class="btn-principal">Submeter ao Motor Risco</button>
+                </form>
+            </section>
+
+            <!-- Resultado do Score Instantâneo -->
+            <section class="card-painel painel-resultado">
+                <h3>Análise de Risco Instantânea</h3>
+                <div class="score-container">
+                    <div id="score-interno" class="score-badge">0/100</div>
+                </div>
+                <h4>Regras Violadas:</h4>
+                <ul id="regras-violadas-lista" class="lista-alertas">
+                    <li>Aguardando submissão de transação...</li>
+                </ul>
+            </section>
+        </div>
+
+        <!-- Livro de Registros / Logs -->
+        <section class="card-painel tabela-secao">
+            <div class="tabela-topo">
+                <h3>Livro de Registro de Transferências</h3>
+                <button id="btn-sincronizar" class="btn-secundario">🔄 Sincronizar</button>
+            </div>
+            <div class="tabela-responsiva">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Beneficiário</th>
+                            <th>Valor</th>
+                            <th>Metadados (Cidade / Dispositivo)</th>
+                            <th>Score</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabela-registros-corpo">
+                        <!-- Inserido dinamicamente via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        // Pequena adaptação local nas funções utilitárias que o app.js chama
+        function exibirMensagemErro(msg) {
+            const erroDiv = document.getElementById('mensagem-login-erro');
+            if(erroDiv) erroDiv.innerText = msg;
+            console.error(msg);
+        }
+        function exibirMensagemSucesso(msg) {
+            document.getElementById('painel-login').style.display = 'none';
+            document.getElementById('painel-principal').style.display = 'block';
+        }
+    </script>
+</body>
+    function exibirMensagemSucesso(msg) {
+    document.getElementById('painel-autenticacao').style.display = 'none';
+    document.getElementById('painel-principal').style.display = 'block';
+    }
+</html>
+
+function exibirMensagemSucesso(msg) {
+    document.getElementById('painel-autenticacao').style.display = 'none';
+    document.getElementById('painel-principal').style.display = 'block';
+}
